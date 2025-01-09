@@ -17,13 +17,14 @@ class Character{
     }
 
     public function save(){
-        $stmt = $this->db->prepare ("INSERT INTO characters (name, description, health, strength, defense, image) VALUES (:name, :description, :health, :strength, :defense, :image)");
+        $stmt = $this->db->prepare ("INSERT INTO characters (name, description, health, strength, defense, image, user_id) VALUES (:name, :description, :health, :strength, :defense, :image, :user_id)");
         $stmt->bindValue(':name', $this->getName());
         $stmt->bindValue(':description', $this->getDescription());
         $stmt->bindValue(':health', $this->getHealth());
         $stmt->bindValue(':strength', $this->getStrength());
         $stmt->bindValue(':defense', $this->getDefense());
         $stmt->bindValue(':image', $this->getImage());
+        $stmt->bindValue(':user_id', $this->getUserId());
 
         return $stmt->execute();
     }

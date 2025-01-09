@@ -3,6 +3,15 @@
 require_once("../config/db.php");
 require_once("../model/Character.php");
 
+session_start();
+
+if (!isset($_SESSION['user_id'])){
+    die("Debes iniciar sesión para acceder a esta página.");
+} else {
+    echo $_SESSION['message'];
+}
+
+
 if ($_SERVER['REQUEST_METHOD'] == 'POST'){
     // Crear objeto Character
     $character = new Character($db);
@@ -17,7 +26,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST'){
 
         print_r($_FILES);
         
-        move_uploaded_file($_FILES['image']['tmp_name'], $targetFile);
+        if(move_uploaded_file($_FILES['image']['tmp_name'], $targetFile)){
+            //$imageFileName = $fileName;
+
+            $character->setImage($targetFile);
+        } else {
+            die("Error al subir la imagen");
+        }
+        
     }
 
     // Poblar el personaje
@@ -26,7 +42,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST'){
         ->setHealth($_POST['health'])
         ->setStrength($_POST['strength'])
         ->setDefense($_POST['defense'])
-        ->setImage($_POST['image']);
+        ->setUserId($_SESSION['user_id']);
 
     // Guardar el Character en la base de datos
     if ($character->save()){
@@ -39,7 +55,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST'){
 $characters = [];
 
 try {
-    $stmt = $db->query("SELECT * FROM characters");
+    $stmt = $db->query("SELECT characters.*, users.username
+    FROM characters
+    JOIN users ON characters.user_id = users.id");
     $characters = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
     echo "Error al leer de la base de datos: " . $e->getMessage();
@@ -52,6 +70,13 @@ try {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
+    <style>
+        .character-image {
+            max-width: 100px;
+            max-height: 100px;
+            object-fit: cover;
+        }
+    </style>
 </head>
 <body>
     <h1>Crea tu personaje</h1>
@@ -99,19 +124,25 @@ try {
                 <th>PV</th>
                 <th>Fuerza</th>
                 <th>Defensa</th>
+                <th>Usuario</th>
                 <th>Acciones</th>
             </tr>
         </thead>
         <tbody>
             <?php foreach ($characters as $character): ?>
                 <tr>
-                    <td>img</td>
+                    <td>
+                        <img src="../resources/<?= $character['image']?>" alt="Imagen del personaje" class="character-image">
+                    </td>
                     <td><?= $character['name']?></td>
                     <td><?= $character['description']?></td>
                     <td><?= $character['health']?></td>
                     <td><?= $character['strength']?></td>
                     <td><?= $character['defense']?></td>
+                    <td><?= $character['username']?></td>
+
                     <td>
+                        <?php if ($character['user_id'] == $_SESSION['user_id']):?>
                         <form action = "../controllers/delete_character.php" method = 'POST'>
                             <input type = "hidden" name = "id" value="<?= $character['id']?>">
                             <button type="submit">Borrar</button>
@@ -121,6 +152,7 @@ try {
                             <input type = "hidden" name = "id" value="<?= $character['id']?>">
                             <button type="submit">Editar</button>
                         </form>
+                        <?php endif; ?>
                     </td>
                 </tr>
             <?php endforeach; ?>
