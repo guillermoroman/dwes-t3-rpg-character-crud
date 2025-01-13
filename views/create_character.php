@@ -134,12 +134,12 @@ try {
                     <td>
                         <img src="../resources/<?= $character['image']?>" alt="Imagen del personaje" class="character-image">
                     </td>
-                    <td><?= $character['name']?></td>
-                    <td><?= $character['description']?></td>
-                    <td><?= $character['health']?></td>
-                    <td><?= $character['strength']?></td>
-                    <td><?= $character['defense']?></td>
-                    <td><?= $character['username']?></td>
+                    <td><?= htmlspecialchars($character['name'])?></td>
+                    <td><?= htmlspecialchars($character['description'])?></td>
+                    <td><?= htmlspecialchars($character['health'])?></td>
+                    <td><?= htmlspecialchars($character['strength'])?></td>
+                    <td><?= htmlspecialchars($character['defense'])?></td>
+                    <td><?= htmlspecialchars($character['username'])?></td>
 
                     <td>
                         <?php if ($character['user_id'] == $_SESSION['user_id']):?>

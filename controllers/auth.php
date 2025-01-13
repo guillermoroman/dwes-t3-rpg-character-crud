@@ -21,6 +21,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['register'])) {
             $_SESSION['username'] = $userName;
             $_SESSION['message'] = "¡Bienvenido por primera vez, $userName";
             header('Location: ../views/create_character.php');
+            $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
             exit;
         }
 

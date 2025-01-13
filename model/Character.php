@@ -89,6 +89,10 @@ class Character{
         return $this->name;
     }
 
+    private function sanitize($data){
+        return htmlspecialchars(trim($data), ENT_QUOTES, 'UTF-8');
+    }
+
     /**
      * Set the value of name
      *
@@ -96,7 +100,7 @@ class Character{
      */ 
     public function setName($name)
     {
-        $this->name = $name;
+        $this->name = $this->sanitize($name);
 
         return $this;
     }
@@ -116,7 +120,7 @@ class Character{
      */ 
     public function setDescription($description)
     {
-        $this->description = $description;
+        $this->description = $this->sanitize($description);
 
         return $this;
     }
