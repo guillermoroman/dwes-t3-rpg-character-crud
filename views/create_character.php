@@ -4,6 +4,10 @@ require_once("../config/db.php");
 require_once("../model/Character.php");
 
 session_start();
+if (empty($_SESSION['csrf_token'])){
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
+$csrf = $_SESSION['csrf_token'];
 
 if (!isset($_SESSION['user_id'])){
     die("Debes iniciar sesión para acceder a esta página.");
@@ -12,45 +16,7 @@ if (!isset($_SESSION['user_id'])){
 }
 
 
-if ($_SERVER['REQUEST_METHOD'] == 'POST'){
-    // Crear objeto Character
-    $character = new Character($db);
 
-    // Subir la imagen
-    if (isset($_FILES['image'])){
-
-        $uploadDir = '../resources/';
-        $fileName = $_FILES['image']['name'];
-        $targetFile = $uploadDir . $fileName;
-        print_r($targetFile);
-
-        print_r($_FILES);
-        
-        if(move_uploaded_file($_FILES['image']['tmp_name'], $targetFile)){
-            //$imageFileName = $fileName;
-
-            $character->setImage($targetFile);
-        } else {
-            die("Error al subir la imagen");
-        }
-        
-    }
-
-    // Poblar el personaje
-    $character->setName($_POST['name'])
-        ->setdescription($_POST['description'])
-        ->setHealth($_POST['health'])
-        ->setStrength($_POST['strength'])
-        ->setDefense($_POST['defense'])
-        ->setUserId($_SESSION['user_id']);
-
-    // Guardar el Character en la base de datos
-    if ($character->save()){
-        echo  "Se ha guardado el personaje";
-    } else  {
-        echo "Error al guardar el personaje";
-    }
-}
 
 $characters = [];
 
@@ -80,7 +46,7 @@ try {
 </head>
 <body>
     <h1>Crea tu personaje</h1>
-    <form action = <?=$_SERVER['PHP_SELF']?> method="POST" enctype="multipart/form-data">
+    <form action = "../controllers/store_character.php" method="POST" enctype="multipart/form-data">
         <label for="nameInput">Nombre:</label>
         <input type="text" name = "name" id = "nameInput" required>
         <br>
@@ -107,6 +73,10 @@ try {
         <label for="imageInput">Imagen:</label>
         <input type="file" name = "image" id = "imageInput" required>
         <br>
+
+        
+        <input type = "hidden" name = "csrf_token"
+            value = "<?=htmlspecialchars($csrf)?>">
 
         <button type="submit">Crear personaje</button>
 
